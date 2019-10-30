@@ -19,7 +19,7 @@ class MotospiderSpider(Spider):
 			Selector(response).xpath("//select[@name='marca']//text()")
 
 		for brand in brands:
-			print ("brand is %s", brand.extract().strip())
+			print ("brand is %s" % brand.extract().strip())
 
 			if brand.extract().strip() == "–Marca–":
 				pass
@@ -29,7 +29,7 @@ class MotospiderSpider(Spider):
 
 					urlBrand =  "https://www.motorbikemag.es/motos-marcas-modelos/?marca=%s" % (item['brand'])
 
-					print ("Trying to visit url %s", urlBrand)		
+					print ("Trying to visit url %s" % urlBrand)		
 					print (brand.extract().strip())
 
 					yield scrapy.Request(urlBrand, callback=self.parse_brand)
@@ -43,19 +43,32 @@ class MotospiderSpider(Spider):
 	def parse_brand(self, response):
 		print ("Visited %s", response.url)
 
+		next_pages_urls = Selector(response).xpath("//div[@class='pagination']/a[not(@class='next page-numbers')]/@href").extract()
 
-		next_pages_urls = Selector(response).xpath("//div[@class='pagination']/a[not(@class='next page-numbers')]/@href")
+		next_page_array = []
+
+		first_page = response.url
+
+		next_pages_urls.insert(0, first_page)
+
+	#	next_page_array.append(next_pages_urls.extract())
+
+		print ("next page urls %s", next_pages_urls)
 
 
-		for next_page in next_pages_urls:
-			print(next_page.extract())
-			absolute_next_page_url = response.urljoin(next_page.extract())
-			print ("Absolute url is: %s", absolute_next_page_url)
-			yield scrapy.Request(absolute_next_page_url, callback = self.parse_item_catalog)
+		pages_length = len(next_pages_urls)
+
+		for num, next_page in enumerate(next_pages_urls):
+			print("Next page is %s and %d" % (next_page, num))
+			absolute_next_page_url = response.urljoin(next_page)
+			print ("Absolute url is: %s" % absolute_next_page_url)
+			priority_req = pages_length - num
+			print ("Priority is %d" % priority_req)
+			yield scrapy.Request(absolute_next_page_url, callback = self.parse_item_catalog, priority = priority_req, dont_filter = True)
 
 
 	def parse_item_catalog(self, response):
-		print ("Visited page %s", response.url)
+		print ("Visited page %s" % response.url)
 
 		items_url_catalog = Selector(response).xpath("//div[@class='thumb']//a/@href")
 
