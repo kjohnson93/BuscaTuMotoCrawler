@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import scrapy
+import pprint
+
+from pprint import pprint
+
 from scrapy import Spider
 from scrapy.selector import Selector
 
@@ -94,14 +98,35 @@ class MotospiderSpider(Spider):
 		if response.url == 'https://www.motorbikemag.es/ficha-tecnica/honda-gl1800-gold-wing-2020/':
 
 			specs_sel = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr/td[2]")
+			print("Length of selector is %d" % len(specs_sel))
 
+			#specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[25]/td[1]//text()").extract()
+			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[1]//text()" % 25).extract()
+			pprint (specs_sel_test)
 
-			print ("selector value is %s" % specs_sel)
+			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[25]/td[2]//text()").extract()
+			pprint (specs_sel_test)
+
+			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[31]/td[1]//text()").extract()
+			pprint (specs_sel_test)
+
+			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[31]/td[2]//text()").extract()
+			pprint (specs_sel_test)
+
+			pprint("selector value is %s" % specs_sel)
 			for index, tablerow in enumerate(specs_sel):
-			#print ("Value from selector is %s" % tablerow)
-				print("Length of selector is %d" % len(specs_sel))
+				pprint (tablerow)
 				print("Index is %s" % index)
-				print("tablerow value is %s" % tablerow)
+				#print("tablerow value is %s" % tablerow.xpath('text()').extract_first()) -> OK +-
+				array = tablerow.xpath('text()').extract()
+				print("Length of array is %d" % len(array))
+
+
+				for val_array in array:
+					print("array value is %s" % val_array)
+
+
+				#print("tablerow value is %s" % )
 
 				#tr = specs_sel.xpath('/tr[' + str(index) + ']')
 				#td = tablerow.xpath('/td[1]')
