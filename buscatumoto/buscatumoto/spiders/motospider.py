@@ -100,30 +100,35 @@ class MotospiderSpider(Spider):
 			specs_sel = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr/td[2]")
 			print("Length of selector is %d" % len(specs_sel))
 
-			#specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[25]/td[1]//text()").extract()
-			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[1]//text()" % 25).extract()
-			pprint (specs_sel_test)
 
-			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[25]/td[2]//text()").extract()
-			pprint (specs_sel_test)
+			td1_array = []
 
-			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[31]/td[1]//text()").extract()
-			pprint (specs_sel_test)
+			for index in range(1,len(specs_sel)):
+				td_1 = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[1]//text()" % index).extract()
+				print("Length of td1 is %d" % len(td_1))
 
-			specs_sel_test = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[31]/td[2]//text()").extract()
-			pprint (specs_sel_test)
-
-			pprint("selector value is %s" % specs_sel)
-			for index, tablerow in enumerate(specs_sel):
-				pprint (tablerow)
-				print("Index is %s" % index)
-				#print("tablerow value is %s" % tablerow.xpath('text()').extract_first()) -> OK +-
-				array = tablerow.xpath('text()').extract()
-				print("Length of array is %d" % len(array))
+				td1_array.append(" ".join(td_1))
+				
 
 
-				for val_array in array:
-					print("array value is %s" % val_array)
+			pprint("length of td1array is: %d" % len(td1_array))
+			pprint(td1_array)
+
+
+
+
+			td2_array = []
+
+			for index in range(1,len(specs_sel)):
+				td_2 = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[2]//text()" % index).extract()
+				print("Length of td2 is %d" % len(td_2))
+
+				td2_array.append(" ".join(td_2))
+				
+
+
+			pprint("length of td2array is: %d" % len(td2_array))
+			pprint(td2_array)
 
 
 				#print("tablerow value is %s" % )
