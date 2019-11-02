@@ -84,51 +84,35 @@ class MotospiderSpider(Spider):
 				yield scrapy.Request(item_url_catalog, callback = self.parse_moto_detalle, dont_filter = True)
 
 
+	#this method crawls a detailed web page of a bike in the web's page catalogue.
 	def parse_moto_detalle(self, response):
 
 		print ("Visited moto page %s" % response.url)
-
-				#tabla todo:
-		#specs_sel = Selector(response).xpath("//div[@id='div-ficha-tecnica']//tr//td//text()")
-
-	
-
 		print("Response url is %s" %response.url)
 
 		if response.url == 'https://www.motorbikemag.es/ficha-tecnica/honda-gl1800-gold-wing-2020/':
 
-			specs_sel = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr/td[2]")
-			print("Length of selector is %d" % len(specs_sel))
+			#This block of code tries to crawl a n-colum table in order to store it inside an array of arrays
 
+			table_number_of_rows = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr")
+			pprint ("Rows of table: %d" % len(table_number_of_rows))
 
-			td1_array = []
+			table_number_of_colums = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table/tbody/tr[1]//td")
+			print ("Colums of table: %d" % len(table_number_of_colums))
+			td_arrays = []
 
-			for index in range(1,len(specs_sel)):
-				td_1 = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[1]//text()" % index).extract()
-				print("Length of td1 is %d" % len(td_1))
+			for column in range(1,len(table_number_of_colums)+1):
+				pprint (column)
+				td_array = []
+				for index in range(1,len(table_number_of_rows)):
+					td_arrays_temp = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[%d]//text()" % (index,column)).extract()
+					td_array.append(" ".join(td_arrays_temp))
+				td_arrays.append(td_array)
+				pprint("Colum of table is %d and length of tdarray is: %d" % (column,len(td_arrays[column-1])))
 
-				td1_array.append(" ".join(td_1))
-				
+			pprint(td_arrays[0])
+			pprint(td_arrays[1])
 
-
-			pprint("length of td1array is: %d" % len(td1_array))
-			pprint(td1_array)
-
-
-
-
-			td2_array = []
-
-			for index in range(1,len(specs_sel)):
-				td_2 = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[2]//text()" % index).extract()
-				print("Length of td2 is %d" % len(td_2))
-
-				td2_array.append(" ".join(td_2))
-				
-
-
-			pprint("length of td2array is: %d" % len(td2_array))
-			pprint(td2_array)
 
 
 				#print("tablerow value is %s" % )
