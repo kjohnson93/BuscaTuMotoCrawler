@@ -9,19 +9,20 @@ from scrapy.item import Item, Field
 
 
 class BuscatumotoItem(Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    brand = Field()
-    #model = Field()
-    #imgThumbUrl = Field()
-    #modelHighlights = Field()
-    #imgBannerUrl = Field()
-    #modelDetailtHighlights = Field()
-    #priceTitle = Field()
-    #priceDesc = Field()
-    #contentDesc = Field()
 
-    #licenses = Field() array
-	#specs = Field() array
-	#relatedItems = Field() array
-	#relatedItemsLink = Field() array
+	brand = Field()
+	model = Field()
+	imgThumbUrl = Field()
+	modelHighlights = Field()
+
+	imgBannerUrl = Field()
+	modelDetailtHighlights = Field()
+	priceTitle = Field()
+	priceDesc = Field()
+	mainDesc = Field()
+	licenses = Field() 
+	licenses_title = Field()
+	specs_title = Field() 
+	specs_table = Field()
+	relatedItems = Field() 
+	relatedItemsUrl = Field() 

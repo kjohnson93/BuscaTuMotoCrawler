@@ -46,11 +46,6 @@ class MotospiderSpider(Spider):
 
 					yield scrapy.Request(urlBrand, callback=self.parse_brand)
 
-			#for each urlBrand, paginate obtaint url of each item and paginat
-			#fetch("urlBrand")
-
-		  #  catalog_item = Selector(response)
-
 
 	def parse_brand(self, response):
 		#print ("Visited %s", response.url)
@@ -115,51 +110,36 @@ class MotospiderSpider(Spider):
 			#test
 			print("Response selector test")
 			#pprint(response.xpath("//div[@id='imgPrincipal']"))
-			test = response.xpath("//div[@id='imgPrincipal']").extract()
-			pprint("Length of test %d" % len(test))
+			item_picture_banner_div = response.xpath("//div[@id='imgPrincipal']").extract()
+			pprint("Length of test %d" % len(item_picture_banner_div))
 
 			#regexp
-			#urltest = re.findall(".*https.*470.jpg", test[0])
-			#src=(.+?)470.jpg" ' -> 1 match
-			#src=(.+?)' -> 2 matches
-			#urltest = re.search("src=(.+?)'", test[0])
 			regexp = "src=\"(.+?)\""
 			pprint("Regexp chain is %s" % regexp)
-			urltest = re.search(regexp, test[0])
+			item_imgBannerUrl = re.search(regexp, item_picture_banner_div[0])
+			item_imgBannerUrl = item_imgBannerUrl.group(1)
 
-			pprint("Regexp result is %s" % urltest)
-			#pprint(urltest.span())
-			#pprint(urltest.string())
-			pprint(urltest.group(1))
-
-
-			#pprint(test[0])
-
-
-			#foto principal
-			item_picture_banner = response.xpath("//div[@id='imgPrincipal']/img[@class='attachment-wt1100_470 size-wt1100_470']/@src").extract()
-
-			print("Item picture banner is %s" % item_picture_banner)
-
-
+			pprint("Regexp result is %s" % item_imgBannerUrl)
 
 			highlight = response.xpath("//div[@class='entry-highlights']//text()").extract()
 			print ("Higlight of moto detail is %s" % highlight)
 
 			#precio
-			precio_title = response.xpath("//div[@id='precio']/div[@class='info-precio']/h2").extract()
-			print("Price of bike is %s" % precio_title)
-			precio_desc = response.xpath("//div[@class='com-precio graybox']/div[@id='precio']/p").extract()
+			item_precio_title = response.xpath("//div[@id='precio']/div[@class='info-precio']/h2//text()").extract_first()
+			#Grabbing selector value from crawler because it contains additional info that can get interpreted later on like urls, etc.
+			item_precio_desc = response.xpath("//div[@class='com-precio graybox']/div[@id='precio']//p").extract()
+			#item_precio_desc = response.xpath("//div[@class='com-precio graybox']/div[@id='precio']//p//text()").extract()
+
 
 			#body
-			main_desc = response.xpath("//div[@id='container']//div[@class='entry-content']//div[@class='post-banner banner-left']/following-sibling::p//text()").extract()
+			item_main_desc = response.xpath("//div[@id='container']//div[@class='entry-content']//div[@class='post-banner banner-left']/following-sibling::p").extract()
 
 			#permisos
-			item_licenses_title = response.xpath("//div[@id='carnets']").extract()
+			item_licenses_title = response.xpath("//div[@id='carnets']//text()").extract_first()
 			item_licenses = response.xpath("//div[@class='iconos']//div[@class='icon-carnet visible']//text()").extract()
 
 			#especificaciones
-			specs_title = response.xpath("//div[@id='ficha']/div[@class='cat-title']/h2/span").extract()
+			item_specs_title = response.xpath("//div[@id='ficha']/div[@class='cat-title']/h2/span//text()").extract_first()
 
 			#This block of code tries to crawl a n-colum table in order to store it inside an array of arrays
 
@@ -168,16 +148,16 @@ class MotospiderSpider(Spider):
 
 			table_number_of_colums = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table/tbody/tr[1]//td")
 			#print ("Colums of table: %d" % len(table_number_of_colums))
-			td_arrays = []
+			item_spec_table = []
 
 			for column in range(1,len(table_number_of_colums)+1):
 				pprint (column)
 				td_array = []
 				for index in range(1,len(table_number_of_rows)):
-					td_arrays_temp = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[%d]//text()" % (index,column)).extract()
-					td_array.append(" ".join(td_arrays_temp))
-				td_arrays.append(td_array)
-				pprint("Colum of table is %d and length of tdarray is: %d" % (column,len(td_arrays[column-1])))
+					item_spec_table_temp = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[%d]//text()" % (index,column)).extract()
+					td_array.append(" ".join(item_spec_table_temp))
+				item_spec_table.append(td_array)
+				pprint("Colum of table is %d and length of tdarray is: %d" % (column,len(item_spec_table[column-1])))
 
 			#likewise motos
 			item_relatedItems = response.xpath("//div[@class='moto-list']//text()").extract()
@@ -191,35 +171,38 @@ class MotospiderSpider(Spider):
 			print( "Item model is %s" % item_model)
 			print("Item imgThumbUrl is %s" % item_imgThumbUrl)
 			print("Item modelHighlights are %s" % item_modelHighLights)
+
+			print("Item picture banner is %s" % item_imgBannerUrl)
 			print("Item highlight is %s" % highlight)
-			print("Item precio title is %s" % precio_title)
+			print("Item precio title is %s" % item_precio_title)
+			print("Item precio desc is %s" % item_precio_desc)
+			print("Item main desc is %s" % item_main_desc)
 			print("Item licenses title is %s" % item_licenses_title)
-			print("Item licenses list is")
-			print(item_licenses)
-			print("Item related motos names are")
-			#print(item_relatedItems)
-			print("Item related motos url are" % item_relatedItemsUrl)
-			#print(item_relatedItemsUrl)
+			print("Item licenses list is %s" % item_licenses)
+			print("Item specs title is %s" % item_specs_title)
+			print("Item specs table: %s" % item_spec_table)
+			print("Item related items are %s" % item_relatedItems)
+			print("Item related items url are %s" % item_relatedItemsUrl) 
 
 			item = BuscatumotoItem()
 
 
-			item['brand'] = item_brand
-			item['model'] = item_model
-			item['imgThumbUrl'] = item_imgThumbUrl
-			item['modelHighlights'] = item_modelHighLights
+			item['brand'] = item_brand #plain text formatted
+			item['model'] = item_model #plain text formatted
+			item['imgThumbUrl'] = item_imgThumbUrl #url text formatted?
+			item['modelHighlights'] = item_modelHighLights #array
 
-			item['imgBannerUrl'] = item_picture_banner
-			item['modelDetailtHighlights'] = highlight
-			item['priceTitle'] = precio_title
-			item['priceDesc'] = precio_desc
-			item['contentDesc'] = main_desc
-			item['licenses'] = item_licenses
-			item['licenses_title'] = item_licenses_title
-			item['specs_title'] = specs_title
-			#item['specs' =]
-			item['relatedItems'] = item_relatedItems
-			item['relatedItemsUrl'] = item_relatedItemsUrl
+			item['imgBannerUrl'] = item_imgBannerUrl #url text formatted?
+			item['modelDetailtHighlights'] = highlight #array
+			item['priceTitle'] = item_precio_title #plain text formatted
+			item['priceDesc'] = item_precio_desc #plain text NO formatted
+			item['mainDesc'] = item_main_desc #plain text NO formatted
+			item['licenses'] = item_licenses #array
+			item['licenses_title'] = item_licenses_title #plain text formatted
+			item['specs_title'] = item_specs_title #plain text formatted
+			item['specs_table'] = item_spec_table #array of arrays (matrix)
+			item['relatedItems'] = item_relatedItems #array  
+			item['relatedItemsUrl'] = item_relatedItemsUrl #array
 
 
 
