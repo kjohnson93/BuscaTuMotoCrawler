@@ -203,15 +203,8 @@ class MotospiderSpider(Spider):
 			item['specs_table'] = item_spec_table #array of arrays (matrix)
 			item['relatedItems'] = item_relatedItems #array  
 			item['relatedItemsUrl'] = item_relatedItemsUrl #array
-
-
-
-            #item = StackItem()
-            #item['title'] = question.xpath(
-            #   'a[@class="question-hyperlink"]/text()').extract()[0]
-            #item['url'] = question.xpath(
-            #    'a[@class="question-hyperlink"]/@href').extract()[0]
-            #yield item
+		
+			yield item
 
 		else:
 			print("NO GOLDWING")

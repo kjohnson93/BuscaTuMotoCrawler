@@ -16,10 +16,9 @@ NEWSPIDER_MODULE = 'buscatumoto.spiders'
 
 ITEM_PIPELINES = {'buscatumoto.pipelines.MongoDBPipeline': 800, }
 
-MONGODB_SERVER = "mongodb://admin:deepmau5@127.0.0.1"
+MONGODB_SERVER = "mongodb://admin:admin@127.0.0.1"
 MONGODB_PORT = 27017
 MONGODB_DB = 'buscatumotodb'
-MONGODB_COLLECTION = 'motos'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
