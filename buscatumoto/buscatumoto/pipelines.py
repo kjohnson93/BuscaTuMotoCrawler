@@ -5,7 +5,7 @@ import logging
 
 class MongoDBPipeline(object):
 
-    collection_name = 'motos'
+    collection_name = 'motos_test'
 
     def __init__(self, mongo_uri, mongo_db):
         self.mongo_uri = mongo_uri
