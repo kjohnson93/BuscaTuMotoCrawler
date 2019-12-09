@@ -35,8 +35,7 @@ class MotospiderSpider(Spider):
 
 			if brand.extract().strip() == "–Marca–":
 				pass
-			elif brand.extract().strip() == "Honda":
-				global item_brand 
+			else:
 				item_brand = brand.extract().strip()
 
 				urlBrand =  "https://www.motorbikemag.es/motos-marcas-modelos/?marca=%s" % item_brand
@@ -44,11 +43,12 @@ class MotospiderSpider(Spider):
 				print ("Trying to visit url %s" % urlBrand)		
 				#print (brand.extract().strip())
 
-				yield scrapy.Request(urlBrand, callback=self.parse_brand)
+				yield scrapy.Request(urlBrand, callback=self.parse_brand, meta = {'item_brand': item_brand})
 
 
 	def parse_brand(self, response):
 		#print ("Visited %s", response.url)
+		item_brand = response.meta.get('item_brand')
 
 		next_pages_urls = Selector(response).xpath("//div[@class='pagination']/a[not(@class='next page-numbers')]/@href").extract()
 
@@ -58,11 +58,6 @@ class MotospiderSpider(Spider):
 
 		next_pages_urls.insert(0, first_page)
 
-	#	next_page_array.append(next_pages_urls.extract())
-
-		#print ("next page urls %s", next_pages_urls)
-
-
 		pages_length = len(next_pages_urls)
 
 		for num, next_page in enumerate(next_pages_urls):
@@ -71,11 +66,12 @@ class MotospiderSpider(Spider):
 			#print ("Absolute url is: %s" % absolute_next_page_url)
 			priority_req = pages_length - num
 			#print ("Priority is %d" % priority_req)
-			yield scrapy.Request(absolute_next_page_url, callback = self.parse_item_catalog, priority = priority_req, dont_filter = True)
+			yield scrapy.Request(absolute_next_page_url, callback = self.parse_item_catalog, priority = priority_req, dont_filter = True, meta = {'item_brand': item_brand})
 
 
 	def parse_item_catalog(self, response):
 		#print ("Visited page %s" % response.url)
+		item_brand = response.meta.get('item_brand')
 
 		#todo cambiar procesado de este motodo. En lugar de obtener solo URL, obtener info de modelo, thumbnail y highlight Y URL para enviar al pipeline.
 		items_url_catalog = Selector(response).xpath("//div[@class='thumb']//a/@href").extract()
@@ -88,7 +84,7 @@ class MotospiderSpider(Spider):
 			item_imgThumbUrl = page_imgThumbUrls[index]
 			item_modelHighLights = page_highlights[index]
 
-			yield scrapy.Request(item_url_catalog, callback = self.parse_moto_detalle, dont_filter = True, meta = {'item_model': item_model,
+			yield scrapy.Request(item_url_catalog, callback = self.parse_moto_detalle, dont_filter = True, meta = {'item_brand': item_brand,'item_model': item_model,
 				'item_imgThumbUrl': item_imgThumbUrl, 'item_modelHighLights': item_modelHighLights})
 
 
@@ -98,6 +94,7 @@ class MotospiderSpider(Spider):
 		print ("Visited moto page %s" % response.url)
 		print("Response url is %s" %response.url)
 
+		item_brand = response.meta.get('item_brand')
 		item_model = response.meta.get('item_model')
 		item_imgThumbUrl = response.meta.get('item_imgThumbUrl')
 		item_modelHighLights = response.meta.get('item_modelHighLights')
@@ -159,8 +156,6 @@ class MotospiderSpider(Spider):
 		item_relatedItemsUrl = response.xpath("//div[@class='moto-list']/a/@href").extract()
 
 		#Sending items to pipeline
-
-		global item_brand
 
 		print("Item brand is %s" % item_brand)
 		print( "Item model is %s" % item_model)
