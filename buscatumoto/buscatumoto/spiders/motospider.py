@@ -27,34 +27,37 @@ class MotospiderSpider(Spider):
 
 
 	def parse(self, response):
-		bikeTypes = \
-			Selector(response).xpath("//select[@id='f_tipo']//text()")
+		bikeTypes = Selector(response).xpath("//select[@id='f_tipo']//text()")
 
 		for bikeType in bikeTypes:
-			if bikeType.extract().strip() == "–Tipo de moto–":
-				pass
-			else:
+			#if bikeType.extract().strip() == "–Tipo de moto–":
+			#	pass
+			#else:
+			#	bikeTypeStrip = bikeType.extract().replace('-','').strip()
+			#	bikeTypeFormatted = bikeTypeStrip.replace(' ', '-')
+			#	item_bikeType = bikeTypeFormatted.strip()
+			#	urlBikeType =  "https://www.motorbikemag.es/motos-marcas-modelos/?tipo=%s" % item_bikeType
+			#	print ("Trying to visit url %s" % urlBikeType)		
+
+			#	yield scrapy.Request(urlBikeType, callback=self.parse_biketype, meta = {'item_bikeType': item_bikeType})
+			if bikeType.extract().strip() == "- Retro":
 				bikeTypeStrip = bikeType.extract().replace('-','').strip()
 				bikeTypeFormatted = bikeTypeStrip.replace(' ', '-')
 				item_bikeType = bikeTypeFormatted.strip()
 				urlBikeType =  "https://www.motorbikemag.es/motos-marcas-modelos/?tipo=%s" % item_bikeType
 				print ("Trying to visit url %s" % urlBikeType)		
 
-				yield scrapy.Request(urlBikeType, callback=self.parse_brand, meta = {'item_bikeType': item_bikeType})
+				yield scrapy.Request(urlBikeType, callback=self.parse_biketype, meta = {'item_bikeType': item_bikeType})
 
 
-	def parse_brand(self, response):
+	def parse_biketype(self, response):
 		#print ("Visited %s", response.url)
-		item_brand = response.meta.get('item_brand')
+		item_bikeType = response.meta.get('item_bikeType')
 
 		next_pages_urls = Selector(response).xpath("//div[@class='pagination']/a[not(@class='next page-numbers')]/@href").extract()
-
 		next_page_array = []
-
 		first_page = response.url
-
 		next_pages_urls.insert(0, first_page)
-
 		pages_length = len(next_pages_urls)
 
 		for num, next_page in enumerate(next_pages_urls):
@@ -63,12 +66,12 @@ class MotospiderSpider(Spider):
 			#print ("Absolute url is: %s" % absolute_next_page_url)
 			priority_req = pages_length - num
 			#print ("Priority is %d" % priority_req)
-			yield scrapy.Request(absolute_next_page_url, callback = self.parse_item_catalog, priority = priority_req, dont_filter = True, meta = {'item_brand': item_brand})
+			yield scrapy.Request(absolute_next_page_url, callback = self.parse_item_catalog, priority = priority_req, dont_filter = True, meta = {'item_bikeType': item_bikeType})
 
 
 	def parse_item_catalog(self, response):
 		#print ("Visited page %s" % response.url)
-		item_brand = response.meta.get('item_brand')
+		item_bikeType = response.meta.get('item_bikeType')
 
 		#todo cambiar procesado de este motodo. En lugar de obtener solo URL, obtener info de modelo, thumbnail y highlight Y URL para enviar al pipeline.
 		items_url_catalog = Selector(response).xpath("//div[@class='thumb']//a/@href").extract()
@@ -76,12 +79,13 @@ class MotospiderSpider(Spider):
 		page_imgThumbUrls = Selector(response).xpath("//div[@class='archive-postlist']//div[@class='thumb']//a//img/@data-lazy-src").extract()
 		page_highlights = Selector(response).xpath("//div[@class='archive-postlist']//div[@class='entry-meta']//text()").extract()
 
+		#for each item in catalog
 		for index, item_url_catalog in enumerate(items_url_catalog):
 			item_model = page_models[index]
 			item_imgThumbUrl = page_imgThumbUrls[index]
 			item_modelHighLights = page_highlights[index]
 
-			yield scrapy.Request(item_url_catalog, callback = self.parse_moto_detalle, dont_filter = True, meta = {'item_brand': item_brand,'item_model': item_model,
+			yield scrapy.Request(item_url_catalog, callback = self.parse_moto_detalle, dont_filter = True, meta = {'item_bikeType': item_bikeType,'item_model': item_model,
 				'item_imgThumbUrl': item_imgThumbUrl, 'item_modelHighLights': item_modelHighLights})
 
 
@@ -89,29 +93,21 @@ class MotospiderSpider(Spider):
 	def parse_moto_detalle(self, response):
 
 		print ("Visited moto page %s" % response.url)
-		print("Response url is %s" %response.url)
 
-		item_brand = response.meta.get('item_brand')
+		item_bikeType = response.meta.get('item_bikeType')
 		item_model = response.meta.get('item_model')
 		item_imgThumbUrl = response.meta.get('item_imgThumbUrl')
 		item_modelHighLights = response.meta.get('item_modelHighLights')
 
-		#test
-		print("Response selector test")
-		#pprint(response.xpath("//div[@id='imgPrincipal']"))
-		item_picture_banner_div = response.xpath("//div[@id='imgPrincipal']").extract()
-		pprint("Length of test %d" % len(item_picture_banner_div))
-
 		#regexp
 		regexp = "src=\"(.+?)\""
-		pprint("Regexp chain is %s" % regexp)
+		#pprint("Regexp chain is %s" % regexp)
+		item_picture_banner_div = response.xpath("//div[@id='imgPrincipal']").extract()
 		item_imgBannerUrl = re.search(regexp, item_picture_banner_div[0])
 		item_imgBannerUrl = item_imgBannerUrl.group(1)
 
-		pprint("Regexp result is %s" % item_imgBannerUrl)
 
-		highlight = response.xpath("//div[@class='entry-highlights']//text()").extract()
-		print ("Higlight of moto detail is %s" % highlight)
+		#print ("Higlight of moto detail is %s" % highlight)
 
 		#precio
 		item_precio_title = response.xpath("//div[@id='precio']/div[@class='info-precio']/h2//text()").extract_first()
@@ -152,29 +148,86 @@ class MotospiderSpider(Spider):
 		item_relatedItems = response.xpath("//div[@class='moto-list']//text()").extract()
 		item_relatedItemsUrl = response.xpath("//div[@class='moto-list']/a/@href").extract()
 
+
+		############ NEW FIELDS (brand, price, power, displacement, seat height, weight)
+
+		highlight = response.xpath("//div[@class='entry-highlights']/text()").extract()
+
+
+		#brand
+		item_brand = response.xpath("//div[@class='entry-meta nav-meta']/a[3]").extract_first()
+		#price
+		price_regex = '(?<=precio: )(.*)(?=€)'
+		price_result = re.search(price_regex, highlight[1], re.IGNORECASE)
+
+		if price_result:
+			item_price = price_result.group(0)
+			#print("Item price after regex is %s" % item_price)
+		else:
+			#print("No regex match, should assign N.D value")
+			item_price = 'N.D.'
+
+		#POWER
+		power_regex = '(?<=Potencia: )(.*)(?= cv)'
+		power_result = re.search(power_regex, highlight[1], re.IGNORECASE)
+
+		if power_result:
+			item_power = power_result.group(0)
+			#print("Item power is %s" % item_power)
+		else:
+			#print("No regex match, should assign N.D. value")
+			item_power = 'N.D.'
+
+		#displacement
+		displacement_regex = '(?<=Cilindrada: )(.*)(?= cc)'
+		displacement_result = re.search(displacement_regex, highlight[1], re.IGNORECASE)
+
+		if displacement_result:
+			item_displacement = displacement_result.group(0)
+			#print("Item displacement is %s" % item_displacement)
+		else:
+			#print("No regex match, should assign N.D. value")
+			item_displacement = 'N.D.'
+
+		#weight
+		weight_regex = '(?<=Peso: )(.*)(?= kg)'
+		weight_result = re.search(weight_regex, highlight[1], re.IGNORECASE)
+
+		if weight_result:
+			item_weight = weight_result.group(0)
+			#print("Item weight is %s" % item_weight)
+		else:
+			#print("No regex match, should assign N.D. value")
+			item_weight = 'N.D.'
+
+		############ NEW FIELS (brand, price, power, displacement, seat height, weight)
+
 		#Sending items to pipeline
 
-		print("Item brand is %s" % item_brand)
-		print( "Item model is %s" % item_model)
-		print("Item imgThumbUrl is %s" % item_imgThumbUrl)
-		print("Item modelHighlights are %s" % item_modelHighLights)
+		#print("Item bike type is %s" % item_bikeType)
+		#print("Item highlight is %s" % highlight)	
+		#print("Item price is %s" % item_price)
+		#print("Item brand is %s" % item_brand)
+		#print( "Item model is %s" % item_model)
+		#print("Item imgThumbUrl is %s" % item_imgThumbUrl)
+		#print("Item modelHighlights are %s" % item_modelHighLights)
 
-		print("Item picture banner is %s" % item_imgBannerUrl)
-		print("Item highlight is %s" % highlight)
-		print("Item precio title is %s" % item_precio_title)
-		print("Item precio desc is %s" % item_precio_desc)
-		print("Item main desc is %s" % item_main_desc)
-		print("Item licenses title is %s" % item_licenses_title)
-		print("Item licenses list is %s" % item_licenses)
-		print("Item specs title is %s" % item_specs_title)
+		#print("Item picture banner is %s" % item_imgBannerUrl)
+		#print("Item precio title is %s" % item_precio_title)
+		#print("Item precio desc is %s" % item_precio_desc)
+		#print("Item main desc is %s" % item_main_desc)
+		#print("Item licenses title is %s" % item_licenses_title)
+		#print("Item licenses list is %s" % item_licenses)
+		#print("Item specs title is %s" % item_specs_title)
 		print("Item specs table: %s" % item_spec_table)
-		print("Item related items are %s" % item_relatedItems)
-		print("Item related items url are %s" % item_relatedItemsUrl) 
+		#print("Item related items are %s" % item_relatedItems)
+		#print("Item related items url are %s" % item_relatedItemsUrl) 
 
 		item = BuscatumotoItem()
 
-
+		item['bikeType'] = item_bikeType
 		item['brand'] = item_brand #plain text formatted
+		item['price'] = item_price
 		item['model'] = item_model #plain text formatted
 		item['imgThumbUrl'] = item_imgThumbUrl #url text formatted?
 		item['modelHighlights'] = item_modelHighLights #array
@@ -191,7 +244,6 @@ class MotospiderSpider(Spider):
 		item['relatedItems'] = item_relatedItems #array  
 		item['relatedItemsUrl'] = item_relatedItemsUrl #array
 	
-		yield item
 
 
 
