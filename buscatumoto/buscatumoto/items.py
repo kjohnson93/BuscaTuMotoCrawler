@@ -10,11 +10,16 @@ from scrapy.item import Item, Field
 
 class BuscatumotoItem(Item):
 
+	bikeType = Field()
 	brand = Field()
 	model = Field()
+	price = Field()
+	power = Field()
+	displacement = Field()
+	seat_height = Field()
+	weight = Field()
 	imgThumbUrl = Field()
 	modelHighlights = Field()
-
 	imgBannerUrl = Field()
 	modelDetailtHighlights = Field()
 	priceTitle = Field()

@@ -27,23 +27,20 @@ class MotospiderSpider(Spider):
 
 
 	def parse(self, response):
-		brands = \
-			Selector(response).xpath("//select[@name='marca']//text()")
+		bikeTypes = \
+			Selector(response).xpath("//select[@id='f_tipo']//text()")
 
-		for brand in brands:
-			#print ("brand is %s" % brand.extract().strip())
-
-			if brand.extract().strip() == "–Marca–":
+		for bikeType in bikeTypes:
+			if bikeType.extract().strip() == "–Tipo de moto–":
 				pass
 			else:
-				item_brand = brand.extract().strip()
+				bikeTypeStrip = bikeType.extract().replace('-','').strip()
+				bikeTypeFormatted = bikeTypeStrip.replace(' ', '-')
+				item_bikeType = bikeTypeFormatted.strip()
+				urlBikeType =  "https://www.motorbikemag.es/motos-marcas-modelos/?tipo=%s" % item_bikeType
+				print ("Trying to visit url %s" % urlBikeType)		
 
-				urlBrand =  "https://www.motorbikemag.es/motos-marcas-modelos/?marca=%s" % item_brand
-
-				print ("Trying to visit url %s" % urlBrand)		
-				#print (brand.extract().strip())
-
-				yield scrapy.Request(urlBrand, callback=self.parse_brand, meta = {'item_brand': item_brand})
+				yield scrapy.Request(urlBikeType, callback=self.parse_brand, meta = {'item_bikeType': item_bikeType})
 
 
 	def parse_brand(self, response):
@@ -218,4 +215,4 @@ class MotospiderSpider(Spider):
 
 
 
-			
+
