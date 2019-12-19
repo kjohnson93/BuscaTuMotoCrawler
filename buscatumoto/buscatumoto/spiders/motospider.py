@@ -30,9 +30,17 @@ class MotospiderSpider(Spider):
 		bikeTypes = Selector(response).xpath("//select[@id='f_tipo']//text()")
 
 		for bikeType in bikeTypes:
-			#if bikeType.extract().strip() == "–Tipo de moto–":
-			#	pass
-			#else:
+			if bikeType.extract().strip() == "–Tipo de moto–":
+				pass
+			else:
+				bikeTypeStrip = bikeType.extract().replace('-','').strip()
+				bikeTypeFormatted = bikeTypeStrip.replace(' ', '-')
+				item_bikeType = bikeTypeFormatted.strip()
+				urlBikeType =  "https://www.motorbikemag.es/motos-marcas-modelos/?tipo=%s" % item_bikeType
+			#	print ("Trying to visit url %s" % urlBikeType)		
+
+				yield scrapy.Request(urlBikeType, callback=self.parse_biketype, meta = {'item_bikeType': item_bikeType})
+			#if bikeType.extract().strip() == "- Retro":
 			#	bikeTypeStrip = bikeType.extract().replace('-','').strip()
 			#	bikeTypeFormatted = bikeTypeStrip.replace(' ', '-')
 			#	item_bikeType = bikeTypeFormatted.strip()
@@ -40,18 +48,10 @@ class MotospiderSpider(Spider):
 			#	print ("Trying to visit url %s" % urlBikeType)		
 
 			#	yield scrapy.Request(urlBikeType, callback=self.parse_biketype, meta = {'item_bikeType': item_bikeType})
-			if bikeType.extract().strip() == "- Retro":
-				bikeTypeStrip = bikeType.extract().replace('-','').strip()
-				bikeTypeFormatted = bikeTypeStrip.replace(' ', '-')
-				item_bikeType = bikeTypeFormatted.strip()
-				urlBikeType =  "https://www.motorbikemag.es/motos-marcas-modelos/?tipo=%s" % item_bikeType
-				print ("Trying to visit url %s" % urlBikeType)		
-
-				yield scrapy.Request(urlBikeType, callback=self.parse_biketype, meta = {'item_bikeType': item_bikeType})
 
 
 	def parse_biketype(self, response):
-		#print ("Visited %s", response.url)
+		print ("Visited parse_biketypee %s", response.url)
 		item_bikeType = response.meta.get('item_bikeType')
 
 		next_pages_urls = Selector(response).xpath("//div[@class='pagination']/a[not(@class='next page-numbers')]/@href").extract()
@@ -70,7 +70,7 @@ class MotospiderSpider(Spider):
 
 
 	def parse_item_catalog(self, response):
-		#print ("Visited page %s" % response.url)
+		print ("Visited page item catalog %s" % response.url)
 		item_bikeType = response.meta.get('item_bikeType')
 
 		#todo cambiar procesado de este motodo. En lugar de obtener solo URL, obtener info de modelo, thumbnail y highlight Y URL para enviar al pipeline.
@@ -219,7 +219,7 @@ class MotospiderSpider(Spider):
 		#print("Item licenses title is %s" % item_licenses_title)
 		#print("Item licenses list is %s" % item_licenses)
 		#print("Item specs title is %s" % item_specs_title)
-		print("Item specs table: %s" % item_spec_table)
+		#print("Item specs table: %s" % item_spec_table)
 		#print("Item related items are %s" % item_relatedItems)
 		#print("Item related items url are %s" % item_relatedItemsUrl) 
 
@@ -243,6 +243,8 @@ class MotospiderSpider(Spider):
 		item['specs_table'] = item_spec_table #array of arrays (matrix)
 		item['relatedItems'] = item_relatedItems #array  
 		item['relatedItemsUrl'] = item_relatedItemsUrl #array
+
+		yield item
 	
 
 
