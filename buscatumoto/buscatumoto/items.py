@@ -16,8 +16,8 @@ class BuscatumotoItem(Item):
 	price = Field()
 	power = Field()
 	displacement = Field()
-	seat_height = Field()
 	weight = Field()
+	
 	imgThumbUrl = Field()
 	modelHighlights = Field()
 	imgBannerUrl = Field()

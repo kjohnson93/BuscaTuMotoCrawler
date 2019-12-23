@@ -155,7 +155,7 @@ class MotospiderSpider(Spider):
 
 
 		#brand
-		item_brand = response.xpath("//div[@class='entry-meta nav-meta']/a[3]").extract_first()
+		item_brand = response.xpath("//div[@class='entry-meta nav-meta']/a[3]/text()").extract_first()
 		#price
 		price_regex = '(?<=precio: )(.*)(?=€)'
 		price_result = re.search(price_regex, highlight[1], re.IGNORECASE)
@@ -227,11 +227,14 @@ class MotospiderSpider(Spider):
 
 		item['bikeType'] = item_bikeType
 		item['brand'] = item_brand #plain text formatted
+		item['model'] = item_model #plain text formatted	
 		item['price'] = item_price
-		item['model'] = item_model #plain text formatted
+		item['power'] = item_power
+		item['displacement'] = item_displacement
+		item['weight'] = item_weight
+
 		item['imgThumbUrl'] = item_imgThumbUrl #url text formatted?
 		item['modelHighlights'] = item_modelHighLights #array
-
 		item['imgBannerUrl'] = item_imgBannerUrl #url text formatted?
 		item['modelDetailtHighlights'] = highlight #array
 		item['priceTitle'] = item_precio_title #plain text formatted
