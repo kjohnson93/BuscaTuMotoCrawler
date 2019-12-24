@@ -17,6 +17,7 @@ class BuscatumotoItem(Item):
 	power = Field()
 	displacement = Field()
 	weight = Field()
+	year = Field()
 	
 	imgThumbUrl = Field()
 	modelHighlights = Field()

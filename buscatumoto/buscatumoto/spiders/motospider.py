@@ -149,7 +149,7 @@ class MotospiderSpider(Spider):
 		item_relatedItemsUrl = response.xpath("//div[@class='moto-list']/a/@href").extract()
 
 
-		############ NEW FIELDS (brand, price, power, displacement, seat height, weight)
+		############ NEW FIELDS (brand, price, power, displacement, seat height, weight and year)
 
 		highlight = response.xpath("//div[@class='entry-highlights']/text()").extract()
 
@@ -161,44 +161,58 @@ class MotospiderSpider(Spider):
 		price_result = re.search(price_regex, highlight[1], re.IGNORECASE)
 
 		if price_result:
-			item_price = price_result.group(0)
-			#print("Item price after regex is %s" % item_price)
+			item_price_str = price_result.group(0)
+			item_price_str = item_price_str.replace(".", "")
+			item_price = int(item_price_str)
 		else:
 			#print("No regex match, should assign N.D value")
-			item_price = 'N.D.'
+			item_price = -1
 
 		#POWER
 		power_regex = '(?<=Potencia: )(.*)(?= cv)'
 		power_result = re.search(power_regex, highlight[1], re.IGNORECASE)
 
 		if power_result:
-			item_power = power_result.group(0)
+			item_power_str = power_result.group(0)
+			item_power_str = item_power_str.replace(",", ".")
+			item_power = float(item_power_str)
 			#print("Item power is %s" % item_power)
 		else:
 			#print("No regex match, should assign N.D. value")
-			item_power = 'N.D.'
+			item_power = -1
 
 		#displacement
 		displacement_regex = '(?<=Cilindrada: )(.*)(?= cc)'
 		displacement_result = re.search(displacement_regex, highlight[1], re.IGNORECASE)
 
 		if displacement_result:
-			item_displacement = displacement_result.group(0)
+			item_displacement_str = displacement_result.group(0)
+			item_displacement_str = item_displacement_str.replace(",", ".")
+			item_displacement = float(item_displacement_str)
 			#print("Item displacement is %s" % item_displacement)
 		else:
 			#print("No regex match, should assign N.D. value")
-			item_displacement = 'N.D.'
+			item_displacement = -1.0
 
 		#weight
 		weight_regex = '(?<=Peso: )(.*)(?= kg)'
 		weight_result = re.search(weight_regex, highlight[1], re.IGNORECASE)
 
 		if weight_result:
-			item_weight = weight_result.group(0)
+			item_weight = float(weight_result.group(0))
 			#print("Item weight is %s" % item_weight)
 		else:
 			#print("No regex match, should assign N.D. value")
-			item_weight = 'N.D.'
+			item_weight = -1.0
+
+
+		year_regex = '(?=20)\d{4}'
+		year_result = re.search(year_regex, item_model, re.IGNORECASE)
+
+		if year_result:
+			item_year = int(year_result.group(0))
+		else:
+			item_year = -1
 
 		############ NEW FIELS (brand, price, power, displacement, seat height, weight)
 
@@ -232,6 +246,7 @@ class MotospiderSpider(Spider):
 		item['power'] = item_power
 		item['displacement'] = item_displacement
 		item['weight'] = item_weight
+		item['year'] = item_year
 
 		item['imgThumbUrl'] = item_imgThumbUrl #url text formatted?
 		item['modelHighlights'] = item_modelHighLights #array
