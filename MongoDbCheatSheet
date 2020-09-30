@@ -1,0 +1,27 @@
+
+#To create root user
+db.createUser( { user: "admin",
+          pwd: "admin",
+          roles: [ "userAdminAnyDatabase",
+                   "dbAdminAnyDatabase",
+                   "readWriteAnyDatabase"
+
+] } )
+
+#To grant roles to user
+db.grantRolesToUser(
+   "scott",
+   [ "readWrite" , { role: "read", db: "technicalkeeda" } ],
+   { w: "majority" , wtimeout: 4000 }
+)
+
+#To revoke roles to user
+db.revokeRolesFromUser(
+    "admin",
+    [
+      { role: "readWriteAnyDatabase", db: "buscatumotodb" }
+    ]
+)
+
+
+

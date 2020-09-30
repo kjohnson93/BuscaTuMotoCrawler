@@ -14,6 +14,12 @@ BOT_NAME = 'buscatumoto'
 SPIDER_MODULES = ['buscatumoto.spiders']
 NEWSPIDER_MODULE = 'buscatumoto.spiders'
 
+ITEM_PIPELINES = {'buscatumoto.pipelines.MongoDBPipeline': 800, }
+
+MONGODB_SERVER = "mongodb://admin:admin@127.0.0.1"
+MONGODB_PORT = 27017
+MONGODB_DB = 'buscatumotodb'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'buscatumoto (+http://www.yourdomain.com)'
@@ -27,7 +33,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16

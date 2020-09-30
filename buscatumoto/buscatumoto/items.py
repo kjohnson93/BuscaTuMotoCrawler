@@ -5,10 +5,30 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from scrapy.item import Item, Field
 
 
-class BuscatumotoItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class BuscatumotoItem(Item):
+
+	bikeType = Field()
+	brand = Field()
+	model = Field()
+	price = Field()
+	power = Field()
+	displacement = Field()
+	weight = Field()
+	year = Field()
+	
+	imgThumbUrl = Field()
+	modelHighlights = Field()
+	imgBannerUrl = Field()
+	modelDetailtHighlights = Field()
+	priceTitle = Field()
+	priceDesc = Field()
+	mainDesc = Field()
+	licenses = Field() 
+	licenses_title = Field()
+	specs_title = Field() 
+	specs_table = Field()
+	relatedItems = Field() 
+	relatedItemsUrl = Field() 
