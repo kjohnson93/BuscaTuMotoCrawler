@@ -123,26 +123,10 @@ class MotospiderSpider(Spider):
 		item_licenses_title = response.xpath("//div[@id='carnets']//text()").extract_first()
 		item_licenses = response.xpath("//div[@class='iconos']//div[@class='icon-carnet visible']//text()").extract()
 
-		#especificaciones
-		item_specs_title = response.xpath("//div[@id='ficha']/div[@class='cat-title']/h2/span//text()").extract_first()
-
 		#This block of code tries to crawl a n-colum table in order to store it inside an array of arrays
 
-		table_number_of_rows = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr")
 		#pprint ("Rows of table: %d" % len(table_number_of_rows))
-
-		table_number_of_colums = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table/tbody/tr[1]//td")
 		#print ("Colums of table: %d" % len(table_number_of_colums))
-		item_spec_table = []
-
-		for column in range(1,len(table_number_of_colums)+1):
-			pprint (column)
-			td_array = []
-			for index in range(1,len(table_number_of_rows)):
-				item_spec_table_temp = Selector(response).xpath("//*[@id='div-ficha-tecnica']/div/table//tr[%d]/td[%d]//text()" % (index,column)).extract()
-				td_array.append(" ".join(item_spec_table_temp))
-			item_spec_table.append(td_array)
-			pprint("Colum of table is %d and length of tdarray is: %d" % (column,len(item_spec_table[column-1])))
 
 		#likewise motos
 		item_relatedItems = response.xpath("//div[@class='moto-list']//text()").extract()
@@ -232,8 +216,6 @@ class MotospiderSpider(Spider):
 		#print("Item main desc is %s" % item_main_desc)
 		#print("Item licenses title is %s" % item_licenses_title)
 		#print("Item licenses list is %s" % item_licenses)
-		#print("Item specs title is %s" % item_specs_title)
-		#print("Item specs table: %s" % item_spec_table)
 		#print("Item related items are %s" % item_relatedItems)
 		#print("Item related items url are %s" % item_relatedItemsUrl) 
 
@@ -257,8 +239,6 @@ class MotospiderSpider(Spider):
 		item['mainDesc'] = item_main_desc #plain text NO formatted
 		item['licenses'] = item_licenses #array
 		item['licenses_title'] = item_licenses_title #plain text formatted
-		item['specs_title'] = item_specs_title #plain text formatted
-		item['specs_table'] = item_spec_table #array of arrays (matrix)
 		item['relatedItems'] = item_relatedItems #array  
 		item['relatedItemsUrl'] = item_relatedItemsUrl #array
 
